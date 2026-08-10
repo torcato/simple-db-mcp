@@ -37,7 +37,13 @@ class Settings:
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
-        source = os.environ if env is None else env
+        source: Mapping[str, str]
+        if env is None:
+            _load_dotenv()
+            source = os.environ
+        else:
+            source = env
+
         config_file = _optional_string(source.get(f"{ENV_PREFIX}CONFIG_FILE"))
         if config_file is not None:
             return cls.from_toml(config_file)
@@ -126,6 +132,14 @@ class Settings:
             ]
 
         return summary
+
+
+def _load_dotenv() -> None:
+    from dotenv import find_dotenv, load_dotenv
+
+    dotenv_path = find_dotenv(usecwd=True)
+    if dotenv_path:
+        load_dotenv(dotenv_path=dotenv_path, override=False)
 
 
 def _optional_string(value: str | None) -> str | None:

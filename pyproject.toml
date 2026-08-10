@@ -28,6 +28,7 @@ dependencies = [
   "asyncmy>=0.2.10",
   "asyncpg>=0.30.0",
   "fastmcp>=2.0.0",
+  "python-dotenv>=1.0.0",
   "sqlalchemy[asyncio]>=2.0.0",
   "tomli>=2.2.1; python_version < '3.11'",
 ]

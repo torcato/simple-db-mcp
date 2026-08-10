@@ -116,6 +116,10 @@ SIMPLE_DB_MCP_MAX_ROWS=100
 SIMPLE_DB_MCP_READ_ONLY=true
 ```
 
+The server automatically loads a `.env` file from the current working directory,
+or the nearest parent directory, before reading environment variables. Values
+already set in the process environment are not overwritten.
+
 The current health tool reports whether a database URL is configured, but it
 does not expose the URL or credentials.
 
@@ -173,16 +177,15 @@ the repository directory. Use an absolute path for `--directory`:
         "/absolute/path/to/simple-db-mcp",
         "run",
         "simple-db-mcp"
-      ],
-      "env": {
-        "SIMPLE_DB_MCP_DATABASE_URL": "postgresql+asyncpg://user:pass@host/db",
-        "SIMPLE_DB_MCP_READ_ONLY": "true",
-        "SIMPLE_DB_MCP_MAX_ROWS": "100"
-      }
+      ]
     }
   }
 }
 ```
+
+With that setup, place the `SIMPLE_DB_MCP_*` variables in
+`/absolute/path/to/simple-db-mcp/.env`, or keep using the MCP client's `env`
+object if you prefer all configuration to live in the client file.
 
 For multiple databases, use `SIMPLE_DB_MCP_CONFIG_FILE` instead of
 `SIMPLE_DB_MCP_DATABASE_URL`:

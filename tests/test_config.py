@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from simple_db_mcp.config import DatabaseSettings, Settings
@@ -39,6 +41,60 @@ def test_settings_from_env() -> None:
     assert settings.query_timeout_seconds == 15
     assert settings.max_rows == 250
     assert settings.read_only is False
+
+
+def test_settings_loads_dotenv_when_reading_process_env(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / ".env").write_text(
+        "\n".join(
+            [
+                "SIMPLE_DB_MCP_DATABASE_URL=mysql+asyncmy://user:pass@localhost/app",
+                "SIMPLE_DB_MCP_QUERY_TIMEOUT_SECONDS=45",
+                "SIMPLE_DB_MCP_MAX_ROWS=300",
+                "SIMPLE_DB_MCP_READ_ONLY=false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    for key in (
+        "SIMPLE_DB_MCP_CONFIG_FILE",
+        "SIMPLE_DB_MCP_DATABASE_URL",
+        "SIMPLE_DB_MCP_QUERY_TIMEOUT_SECONDS",
+        "SIMPLE_DB_MCP_MAX_ROWS",
+        "SIMPLE_DB_MCP_READ_ONLY",
+    ):
+        monkeypatch.delenv(key, raising=False)
+
+    settings = Settings.from_env()
+
+    assert settings.configured_databases == (
+        DatabaseSettings(
+            name="default",
+            url="mysql+asyncmy://user:pass@localhost/app",
+            query_timeout_seconds=45,
+            max_rows=300,
+            read_only=False,
+        ),
+    )
+
+
+def test_settings_dotenv_does_not_override_process_env(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / ".env").write_text(
+        "SIMPLE_DB_MCP_MAX_ROWS=300\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("SIMPLE_DB_MCP_MAX_ROWS", "25")
+
+    settings = Settings.from_env()
+
+    assert settings.max_rows == 25
 
 
 def test_public_summary_does_not_include_database_url() -> None:
