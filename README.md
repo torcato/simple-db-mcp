@@ -6,9 +6,9 @@ and will initially support PostgreSQL and MySQL.
 
 ## Status
 
-Phase 1 is implemented. The project now has a Python package skeleton, a
+Phase 2 is implemented. The project now has a Python package skeleton, a
 FastMCP server entry point, environment-based settings, basic health/version
-tools, and initial tests.
+tools, an async SQLAlchemy connection layer, `ping_database`, and initial tests.
 
 ## Goals
 
@@ -42,11 +42,12 @@ The database-focused version should expose a small, predictable tool surface:
 
 Later versions can add optional write tools behind explicit configuration.
 
-Current Phase 1 tools:
+Current tools:
 
 | Tool | Purpose |
 | --- | --- |
 | `health` | Return server health and non-sensitive configuration. |
+| `ping_database` | Verify that the configured database connection works. |
 | `version` | Return the server name and package version. |
 
 ## Database Support
@@ -58,6 +59,10 @@ Planned drivers:
 
 - PostgreSQL: `asyncpg`
 - MySQL: `asyncmy`
+
+The current connection layer validates SQLAlchemy async URLs that use
+`postgresql+asyncpg` or `mysql+asyncmy`, creates async engines lazily, and
+disposes them through an explicit async close method.
 
 Example connection URLs:
 
@@ -147,6 +152,8 @@ be conservative:
 - Avoid logging credentials.
 - Return concise error messages to clients while keeping debug details in local
   logs.
+- Avoid returning raw database URLs or driver exception messages from
+  connection failures.
 - Document that users should create least-privilege database accounts for this
   server.
 
