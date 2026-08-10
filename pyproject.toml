@@ -11,15 +11,34 @@ requires-python = ">=3.10"
 authors = [
   { name = "Cesar Torcato" },
 ]
+keywords = ["database", "fastmcp", "mcp", "mysql", "postgresql"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Database",
+  "Typing :: Typed",
+]
 dependencies = [
   "asyncmy>=0.2.10",
   "asyncpg>=0.30.0",
   "fastmcp>=2.0.0",
   "sqlalchemy[asyncio]>=2.0.0",
+  "tomli>=2.2.1; python_version < '3.11'",
 ]
 
 [project.scripts]
 simple-db-mcp = "simple_db_mcp.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/torcato/simple-db-mcp"
+Repository = "https://github.com/torcato/simple-db-mcp"
+Issues = "https://github.com/torcato/simple-db-mcp/issues"
 
 [dependency-groups]
 dev = [

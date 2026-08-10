@@ -1,0 +1,13 @@
+[[databases]]
+name = "warehouse"
+url = "postgresql+asyncpg://user:password@localhost:5432/warehouse"
+query_timeout_seconds = 30
+max_rows = 500
+read_only = true
+
+[[databases]]
+name = "app"
+url = "mysql+asyncmy://user:password@localhost:3306/app"
+query_timeout_seconds = 30
+max_rows = 100
+read_only = true

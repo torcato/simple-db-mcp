@@ -4,8 +4,7 @@ from typing import Any
 
 from simple_db_mcp import __version__
 from simple_db_mcp.config import Settings
-from simple_db_mcp.database import DatabaseConnection, DatabaseConnectionError
-
+from simple_db_mcp.database import DatabaseConnection, DatabaseRegistry
 
 SERVER_NAME = "simple-db-mcp"
 
@@ -23,11 +22,7 @@ def create_server(settings: Settings | None = None) -> Any:
         ) from exc
 
     active_settings = settings or Settings.from_env()
-    database = (
-        DatabaseConnection.from_settings(active_settings)
-        if active_settings.database_configured
-        else None
-    )
+    registry = DatabaseRegistry.from_settings(active_settings)
     mcp = FastMCP(name=SERVER_NAME)
 
     @mcp.tool
@@ -49,20 +44,88 @@ def create_server(settings: Settings | None = None) -> Any:
         }
 
     @mcp.tool
-    async def ping_database() -> dict[str, object]:
+    async def ping_database(database: str | None = None) -> dict[str, object]:
         """Verify that the configured database connection works."""
-        if database is None:
-            return {
-                "status": "not_configured",
-                "database_configured": False,
-            }
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
 
-        try:
-            return await database.ping()
-        except DatabaseConnectionError:
-            raise
+        return await connection.ping()
+
+    @mcp.tool
+    async def list_schemas(database: str | None = None) -> dict[str, object]:
+        """List available database schemas."""
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
+
+        return await connection.list_schemas()
+
+    @mcp.tool
+    async def list_tables(
+        schema: str | None = None,
+        database: str | None = None,
+    ) -> dict[str, object]:
+        """List tables and views in a schema."""
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
+
+        return await connection.list_tables(schema)
+
+    @mcp.tool
+    async def describe_table(
+        table: str,
+        schema: str | None = None,
+        database: str | None = None,
+    ) -> dict[str, object]:
+        """Describe columns and primary key metadata for a table."""
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
+
+        return await connection.describe_table(table, schema)
+
+    @mcp.tool
+    async def execute_query(
+        sql: str,
+        limit: int | None = None,
+        database: str | None = None,
+    ) -> dict[str, object]:
+        """Execute a read-only SQL query with a configured row limit."""
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
+
+        return await connection.execute_query(sql, limit)
+
+    @mcp.tool
+    async def explain_query(
+        sql: str,
+        database: str | None = None,
+    ) -> dict[str, object]:
+        """Return the database query plan for a read-only SQL query."""
+        connection = _select_database(registry, database)
+        if connection is None:
+            return _not_configured()
+
+        return await connection.explain_query(sql)
 
     return mcp
+
+
+def _select_database(
+    registry: DatabaseRegistry,
+    database: str | None,
+) -> DatabaseConnection | None:
+    return registry.get(database)
+
+
+def _not_configured() -> dict[str, object]:
+    return {
+        "status": "not_configured",
+        "database_configured": False,
+    }
 
 
 mcp = create_server()

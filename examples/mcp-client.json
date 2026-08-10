@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "simple-db-mcp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/simple-db-mcp",
+        "run",
+        "simple-db-mcp"
+      ],
+      "env": {
+        "SIMPLE_DB_MCP_DATABASE_URL": "postgresql+asyncpg://user:pass@host/db",
+        "SIMPLE_DB_MCP_READ_ONLY": "true",
+        "SIMPLE_DB_MCP_MAX_ROWS": "100"
+      }
+    }
+  }
+}
