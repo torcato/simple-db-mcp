@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "simple-db-mcp"
+version = "0.1.0"
+description = "A small FastMCP server for querying relational databases."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Cesar Torcato" },
+]
+dependencies = [
+  "asyncmy>=0.2.10",
+  "asyncpg>=0.30.0",
+  "fastmcp>=2.0.0",
+  "sqlalchemy[asyncio]>=2.0.0",
+]
+
+[project.scripts]
+simple-db-mcp = "simple_db_mcp.cli:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.14.0",
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.25.0",
+  "ruff>=0.8.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/simple_db_mcp"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
+
+[tool.mypy]
+ignore_missing_imports = true
+mypy_path = "src"
+python_version = "3.10"
+strict = true

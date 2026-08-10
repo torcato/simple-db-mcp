@@ -6,8 +6,9 @@ and will initially support PostgreSQL and MySQL.
 
 ## Status
 
-Planning stage. This repository currently contains the project README and
-development plan. Implementation will follow the milestones below.
+Phase 1 is implemented. The project now has a Python package skeleton, a
+FastMCP server entry point, environment-based settings, basic health/version
+tools, and initial tests.
 
 ## Goals
 
@@ -28,7 +29,7 @@ development plan. Implementation will follow the milestones below.
 
 ## Planned MCP Tools
 
-The first version should expose a small, predictable tool surface:
+The database-focused version should expose a small, predictable tool surface:
 
 | Tool | Purpose |
 | --- | --- |
@@ -40,6 +41,13 @@ The first version should expose a small, predictable tool surface:
 | `explain_query` | Return the database query plan for a read-only query. |
 
 Later versions can add optional write tools behind explicit configuration.
+
+Current Phase 1 tools:
+
+| Tool | Purpose |
+| --- | --- |
+| `health` | Return server health and non-sensitive configuration. |
+| `version` | Return the server name and package version. |
 
 ## Database Support
 
@@ -69,6 +77,9 @@ SIMPLE_DB_MCP_MAX_ROWS=100
 SIMPLE_DB_MCP_READ_ONLY=true
 ```
 
+The current health tool reports whether a database URL is configured, but it
+does not expose the URL or credentials.
+
 Planned follow-up configuration can support multiple named connections:
 
 ```toml
@@ -87,16 +98,34 @@ max_rows = 100
 
 ## Expected Usage
 
-Once implemented, local stdio usage should look similar to:
+Install dependencies:
+
+```bash
+uv sync
+```
+
+Run tests:
+
+```bash
+uv run pytest
+```
+
+Show CLI options:
+
+```bash
+uv run simple-db-mcp --help
+```
+
+Start the server with the default stdio transport:
 
 ```bash
 uv run simple-db-mcp
 ```
 
-or:
+Run through the FastMCP CLI:
 
 ```bash
-fastmcp run src/simple_db_mcp/server.py
+uv run fastmcp run src/simple_db_mcp/server.py --project .
 ```
 
 For HTTP deployments, the server can later expose FastMCP's streamable HTTP
@@ -213,7 +242,7 @@ Acceptance criteria:
 
 - A new user can install, configure, and run the server from the README alone.
 
-## Suggested Initial Dependencies
+## Dependencies
 
 Runtime:
 
@@ -221,7 +250,6 @@ Runtime:
 - `sqlalchemy`
 - `asyncpg`
 - `asyncmy`
-- `pydantic-settings`
 
 Development:
 
